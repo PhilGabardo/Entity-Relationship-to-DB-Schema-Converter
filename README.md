@@ -10,6 +10,8 @@ in a databases course that I am currently taking. The assignment involved conver
 a long and tedious task, so I decided to script it as this seemed like a fun way to get the assignment done, and I would learn the 
 material inside out.
 
+NOTE: this is a work in progress.
+
 ## Conversion Rules
 
 The ER relation is converting according to rules specified in www.cs.sjsu.edu/faculty/lee/cs157/26Presentation_Jung_T_Chang.ppt.
