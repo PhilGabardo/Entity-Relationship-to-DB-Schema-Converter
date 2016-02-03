@@ -46,3 +46,12 @@ Relation(tab)\<RELATION_NAME\>(tab)\<RELATION_TYPE\>(tab)\<IS_ENTITY_WEAK\>(tab)
 
 RELATION_TYPE must be one of {oneToOne, oneToMany, manyToMany, isa}.
 
+If the relation has any attributes, another line must be included to declare these attributes. The line should include the attribute names, separated by tabs.
+
+
+See ER.tsv for an example of a fully formatted ER file.
+
+### Testing
+
+For a sample test case, run python ERtoSchema.py ER.tsv.
+
