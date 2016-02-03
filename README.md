@@ -15,7 +15,7 @@ material inside out.
 
 The script is run as:
 ```
-python ERtoSchema.py \<filename\>
+python ERtoSchema.py <filename>
 ```
 
 where \<filename\> is the tsv representation of the ER model you want to convert. The tsv file must be formatted according to the following conventions:
@@ -28,9 +28,9 @@ ALL entities must be declared before relations.
 NOTE: Any \<IS_*\> fields should either be True or False.
 
 To declare an entity, include the following line:
-
-Entity(tab)\<ENTITY_NAME\>(tab)\<NUMBER_OF_ENTITY_ATTRIBUTES\>(tab)\<IS_ENTITY_WEAK\>
-
+```
+Entity(tab)<ENTITY_NAME>(tab)<NUMBER_OF_ENTITY_ATTRIBUTES>(tab)<IS_ENTITY_WEAK>
+```
 
 Then you must declare NUMBER_OF_ENTITY_ATTRIBUTES attributes...
 
@@ -56,5 +56,5 @@ See ER.tsv for an example of a fully formatted ER file.
 
 For a sample test case, run:
 ```
-python ERtoSchema.py ER.tsv.
+python ERtoSchema.py ER.tsv
 ```
