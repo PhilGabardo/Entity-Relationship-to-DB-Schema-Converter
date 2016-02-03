@@ -4,6 +4,7 @@ class Table(object):
 	def __init__(self):
 		self.name = None
 		self.attributes = []
+		self.PK = None
 
 class Attribute(object):
 	def __init__(self):
@@ -45,11 +46,14 @@ def createTable(entity):
 	return table
 
 
+# Decompose composite attributes and make new tables for multivalued attributes
 def preprocessAttributes(entities):
 	# take care of composite/multivalue attributes
         for entity in entities:
                 attributes = entity.attributes
                 for attribute in attributes:
+
+			# make new table for multivalued attributes
                         if attribute.multivalued:
                                 newEntity = Entity()
                                 newEntity.name = entity.name + "_" + attribute.name
@@ -82,6 +86,8 @@ def preprocessAttributes(entities):
                                 attribute.FK = True
 				newEntity.attributes.append(FK)
 				entities.append(newEntity)
+
+			# decompose composite attributes
                         elif len(attribute.attributes) > 0:
                                 for innerAttribute in attribute.attributes:
                                         newAttribute = Attribute()
@@ -95,11 +101,15 @@ def generateTables(entities, relations):
 
 	tables = {}
 
+	# Generate tables for all entities
 	for entity in entities:
 		eTable = createTable(entity)
 		tables[entity.name] = eTable
 
+
+	# Generate/augment tables for relations. The action taken depends on relation type and the participation totality.
 	for rel in relations:
+
 		if rel.type == RelationType.oneToOne:
 			if rel.E1Total == False and rel.E2Total == False:
 				entity = Entity()
@@ -233,6 +243,7 @@ def displayResults(entities, relations):
 
 	
 
+# parse entities/relations from file
 def parse(filename):
 	file = open(filename, 'r')
 	entities = {}
@@ -240,6 +251,8 @@ def parse(filename):
 	line = file.readline().strip()
 	while line:
 		elements = line.split('\t')
+
+		# entity lines...
 		if elements[0] == "Entity":
 			entity = Entity()
 			entity.name = elements[1]
@@ -250,6 +263,7 @@ def parse(filename):
 				attr.name = innerElements[0]
 				if innerElements[1] == "True":
 					attr.multivalued = True
+				# composite attribute
 				if int(innerElements[2]) > 0:
 					line = file.readline().strip()
 					innerInnerElements = line.split('\t')
@@ -266,6 +280,9 @@ def parse(filename):
 					print attr.name
 					entity.discriminator = attr.name
 				entity.attributes.append(attr)
+
+				# make PK if one doesn't exist, and entity doesn't have discriminator
+				# PK is composed of all entity attributes
 				if entity.PK == None and entity.discriminator == None:
 					PK = ""
 					for attr in entity.attributes:
@@ -275,6 +292,7 @@ def parse(filename):
 			if elements[3] == "True":
 				entity.weak = True
 			entities[entity.name] = entity
+		# relation lines...
 		elif elements[0] == "Relation":
 			relation = Relation()
 			relation.name = elements[1]
@@ -289,6 +307,7 @@ def parse(filename):
 			E1 = elements[3]
 			E2 = elements[4]
 
+			# relation has attributes
 			if int(elements[5]) > 0:
 				line = file.readline().strip()
                                 innerElements = line.split('\t')
@@ -300,9 +319,10 @@ def parse(filename):
 			relation.E1 = entities[E1]
 			relation.E2 = entities[E2]
 			
+			# identifying relation: make PK for weak entity.
 			if elements[6] == "True":
                                 relation.identifying = True
-                                if relation.E1.PK != None:
+                                if relation.E2.weak:
 					print relation.E1.PK
 					print relation.E2.name
 					PK = Attribute()
@@ -310,7 +330,7 @@ def parse(filename):
 					PK.name = relation.E2.discriminator + "_" + relation.E1.PK
 					relation.E2.attributes.append(PK)
 					relation.E2.PK = PK.name
-				elif relation.E2.PK != None:
+				elif relation.E1.weak:
 					print relation.E1.name
 					PK = Attribute()
                                         PK.PK = True
@@ -336,6 +356,7 @@ def parse(filename):
 	return [entityList, relationList]
 
 
+# Main flow.
 def convert(file):
 	(entityList, relationList) = parse(file)
         print "Parsing done:\n\n"
@@ -348,6 +369,7 @@ def convert(file):
 	return tables
 
 
+# Convert ER file to schema and print it
 tables = convert(sys.argv[1])
 printSchema(tables)
 
