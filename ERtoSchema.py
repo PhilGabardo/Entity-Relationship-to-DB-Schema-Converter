@@ -50,9 +50,9 @@ def createTable(entity):
 def preprocessAttributes(entities):
 	# take care of composite/multivalue attributes
         for entity in entities:
+		toDelete = []
                 attributes = entity.attributes
                 for attribute in attributes:
-
 			# make new table for multivalued attributes
                         if attribute.multivalued:
                                 newEntity = Entity()
@@ -60,9 +60,9 @@ def preprocessAttributes(entities):
                                 newEntity.PK = ""
 				if attribute.composite:
                                 	for innerAttribute in attribute.attributes:
-                                        	newEntity.PK += innerAttribute + "_"
+                                        	newEntity.PK += innerAttribute + ","
 				else:
-					newEntity.PK += attribute.name + "_"
+					newEntity.PK += attribute.name + ","
                                 newEntity.PK += entity.PK
 				
 				PK = Attribute()
@@ -82,18 +82,23 @@ def preprocessAttributes(entities):
                                 FK = Attribute()
                                 FK.FK = True
                                 FK.name = entity.PK
-				attribute.name = newEntity.PK
-                                attribute.FK = True
+				#attribute.name = newEntity.PK
+                                #attribute.FK = True
+				toDelete.append(attribute)
+				#entity.attributes.remove(attribute)
 				newEntity.attributes.append(FK)
 				entities.append(newEntity)
 
 			# decompose composite attributes
-                        elif len(attribute.attributes) > 0:
+                        elif attribute.composite:
                                 for innerAttribute in attribute.attributes:
                                         newAttribute = Attribute()
                                         newAttribute.name = innerAttribute
                                         entity.attributes.append(newAttribute)
-                                entity.attributes.remove(attribute)
+                                toDelete.append(attribute)
+				#entity.attributes.remove(attribute)
+		for el in toDelete:
+			entity.attributes.remove(el)
 	return entities	
 
 
@@ -121,7 +126,7 @@ def generateTables(entities, relations):
                                 FK2.FK = True
                                 FK2.name = E2.PK
                                 entity.attribute.append(FK2)
-				entity.PK = FK1.name + "_" + FK2.name
+				entity.PK = FK1.name + "," + FK2.name
 				entity.name = E1.name + "_" + E2.name
 				for attr in rel.attributes:
 					entity.attributes.append(attr)
@@ -160,7 +165,7 @@ def generateTables(entities, relations):
                                 FK2.FK = True
                                 FK2.name = E2.PK
                                 entity.attribute.append(FK2)
-                                entity.PK = FK1.name + "_" + FK2.name
+                                entity.PK = FK1.name + "," + FK2.name
                                 entity.name = E1.name + "_" + E2.name
                                 for attr in rel.attributes:
                                         entity.attributes.append(attr)
@@ -211,14 +216,17 @@ def generateTables(entities, relations):
 def printSchema(tables):
 	schema = ""
 	for table in tables:
-		schema += "TABLE: " + table.name + "\n"
+		schema += table.name.upper() + "("
 		for attribute in table.attributes:
-			schema += "\t\tATTRIBUTE: " + attribute.name
+			if not(attribute.PK and attribute.name.count(',') > 0):
+				schema += attribute.name.lower() + ", "
+		schema = schema[:-2] + ")\n"
+		for attribute in table.attributes:
 			if attribute.FK:
-				schema += "(FK)"
+				schema += "\tFK = (" + attribute.name.lower() + ")\n"
 			if attribute.PK:
-				schema += "(PK)" 
-			schema += "\n"
+				schema += "\tPK = (" + attribute.name.lower() + ")\n" 
+		schema += "\n"
 	print schema	
 
 
@@ -269,7 +277,7 @@ def parse(filename):
 					innerInnerElements = line.split('\t')
 					for innerAttr in innerInnerElements:
 						attr.attributes.append(innerAttr)
-
+					attr.composite = True
 				if innerElements[3] == "True":
 					attr.PK = True
 					entity.PK = attr.name
@@ -285,7 +293,7 @@ def parse(filename):
 				if entity.PK == None and entity.discriminator == None:
 					PK = ""
 					for attr in entity.attributes:
-						PK += attr.name + "_"
+						PK += attr.name + ","
 					PK = PK[:-1]
 					entity.PK = PK
 			if elements[3] == "True":
@@ -324,13 +332,13 @@ def parse(filename):
                                 if relation.E2.weak:
 					PK = Attribute()
 					PK.PK = True
-					PK.name = relation.E2.discriminator + "_" + relation.E1.PK
+					PK.name = relation.E2.discriminator + "," + relation.E1.PK
 					relation.E2.attributes.append(PK)
 					relation.E2.PK = PK.name
 				elif relation.E1.weak:
 					PK = Attribute()
                                         PK.PK = True
-                                        PK.name = relation.E1.discriminator + "_" + relation.E2.PK
+                                        PK.name = relation.E1.discriminator + "," + relation.E2.PK
                                         relation.E1.attributes.append(PK)
                                         relation.E1.PK = PK.name
 				else:
@@ -340,7 +348,7 @@ def parse(filename):
 				relation.E1Total = True
 			if elements[8] == "True":
                                 relation.E2Total = True
-			relations[relation.name + E1 + "_" + E2] = relation
+			relations[relation.name + E1 + "," + E2] = relation
 		line = file.readline().strip()
 	entityList = []
 	relationList = []
@@ -355,12 +363,9 @@ def parse(filename):
 # Main flow.
 def convert(file):
 	(entityList, relationList) = parse(file)
-        print "Parsing done..."
-        # displayERBreakdown(entityList, relationList)    Uncomment this line to see parsed ER
+        # displayERBreakdown(entityList, relationList)  Uncomment this line to see parsed ER after attributes are preprocessed 
         entityList = preprocessAttributes(entityList)
-        print "Preprocessing done..."
         # displayERBreakdown(entityList, relationList)	  Uncomment this line to see parsed ER after attributes are preprocessed
-        print "Final schema:\n"
         tables = generateTables(entityList, relationList)
 	return tables
 

@@ -70,5 +70,5 @@ Relation	viewing	manyToMany	Renter	Property	1	False	False	False
 Date
 Relation	ownedBy	oneToMany	Property	Owner	0	False	True	False
 Relation	overseenBy	oneToMany	Property	Staff	0	False	True	False
-Relation	manages	oneToOne	Manager	Branch	0	False	True	True
+Relation	manages	oneToMany	Manager	Branch	0	False	True	True
 Relation	allocatedTo	oneToMany	Worker	Branch	0	False	True	True
