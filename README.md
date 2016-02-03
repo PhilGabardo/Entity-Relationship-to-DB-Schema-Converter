@@ -16,3 +16,13 @@ material inside out.
 The script is run as:
 
 python ERtoSchema.py \<filename\>
+
+where \<filename\> is the tsv representation of the ER model you want to convert. The tsv file must be formatted according to the following conventions:
+
+#### Order
+ALL entities must be declared before relations.
+
+#### Entity Declaration
+To declare an entity, include the following lines:
+
+Entity(tab)\<ENTITY_NAME\>(tab)\<NUMBER_OF_ENTITY_ATTRIBUTES\>(tab)\<IS_ENTITY_WEAK\>
