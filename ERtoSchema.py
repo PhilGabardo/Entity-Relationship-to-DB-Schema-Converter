@@ -222,7 +222,7 @@ def printSchema(tables):
 	print schema	
 
 
-def displayResults(entities, relations):
+def displayERBreakdown(entities, relations):
 	print "-------ER BREAKDOWN-------\n"
 	for entity in entities:
 		print "ENTITY: " + entity.name
@@ -277,7 +277,6 @@ def parse(filename):
 				if innerElements[4] == "True":
 					attr.FK = True
 				if innerElements[5] == "True":
-					print attr.name
 					entity.discriminator = attr.name
 				entity.attributes.append(attr)
 
@@ -323,15 +322,12 @@ def parse(filename):
 			if elements[6] == "True":
                                 relation.identifying = True
                                 if relation.E2.weak:
-					print relation.E1.PK
-					print relation.E2.name
 					PK = Attribute()
 					PK.PK = True
 					PK.name = relation.E2.discriminator + "_" + relation.E1.PK
 					relation.E2.attributes.append(PK)
 					relation.E2.PK = PK.name
 				elif relation.E1.weak:
-					print relation.E1.name
 					PK = Attribute()
                                         PK.PK = True
                                         PK.name = relation.E1.discriminator + "_" + relation.E2.PK
@@ -359,12 +355,12 @@ def parse(filename):
 # Main flow.
 def convert(file):
 	(entityList, relationList) = parse(file)
-        print "Parsing done:\n\n"
-        displayResults(entityList, relationList)
+        print "Parsing done..."
+        # displayERBreakdown(entityList, relationList)    Uncomment this line to see parsed ER
         entityList = preprocessAttributes(entityList)
-        print "\n\nPreprocessing done:\n\n"
-        displayResults(entityList, relationList)
-        print "\n\nFinal schema:\n\n"
+        print "Preprocessing done..."
+        # displayERBreakdown(entityList, relationList)	  Uncomment this line to see parsed ER after attributes are preprocessed
+        print "Final schema:\n"
         tables = generateTables(entityList, relationList)
 	return tables
 
