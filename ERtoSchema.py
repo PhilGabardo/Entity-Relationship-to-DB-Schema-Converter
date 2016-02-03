@@ -1,3 +1,5 @@
+import sys
+
 class Table(object):
 	def __init__(self):
 		self.name = None
@@ -20,18 +22,20 @@ class Entity(object):
 		self.weak = False
 		self.discriminator = None
 
-class RelationshipType:
+class RelationType:
 	oneToOne, oneToMany, manyToMany, isa = range(4)
 
 
-class Relationship(object):
+class Relation(object):
 	def __init__(self):
 		self.name = None
 		self.type = None
 		self.E1 = None
 		self.E2 = None
+		self.identifying = False
 		self.attributes = []
-
+		self.E1Total = False
+		self.E2Total = False
 
 def createTable(entity):
 	table = Table()
@@ -50,9 +54,18 @@ def preprocessAttributes(entities):
                                 newEntity = Entity()
                                 newEntity.name = entity.name + "_" + attribute.name
                                 newEntity.PK = ""
-                                for innerAttribute in attribute.attributes:
-                                        newEntity.PK += innerAttribute + "_"
-                                newEntity.PK = newEntity.PK[:-1]
+				if attribute.composite:
+                                	for innerAttribute in attribute.attributes:
+                                        	newEntity.PK += innerAttribute + "_"
+				else:
+					newEntity.PK += attribute.name + "_"
+                                newEntity.PK += entity.PK
+				
+				PK = Attribute()
+				PK.PK = True
+				PK.name = newEntity.PK
+				newEntity.attributes.append(PK)
+
 				if len(attribute.attributes) == 0:
 					newAttribute = Attribute()
 					newAttribute.name = attribute.name
@@ -65,7 +78,9 @@ def preprocessAttributes(entities):
                                 FK = Attribute()
                                 FK.FK = True
                                 FK.name = entity.PK
-                                newEntity.attributes.append(FK)
+				attribute.name = newEntity.PK
+                                attribute.FK = True
+				newEntity.attributes.append(FK)
 				entities.append(newEntity)
                         elif len(attribute.attributes) > 0:
                                 for innerAttribute in attribute.attributes:
@@ -82,36 +97,76 @@ def generateTables(entities, relations):
 
 	for entity in entities:
 		eTable = createTable(entity)
-		print eTable.name
 		tables[entity.name] = eTable
 
 	for rel in relations:
-		if rel.type == RelationshipType.oneToOne:
-			# Add FK to link tables
-			tableE1 = tables[rel.E1.name]
-			tableE2 = tables[rel.E2.name]
-			FK = Attribute()
-			FK.FK = True
-			FK.name = tableE2.PK
-			tableE1.attributes.append(FK)	
-			for attr in rel.attributes:
-				tableE1.attributes(attr)			
-			
+		if rel.type == RelationType.oneToOne:
+			if rel.E1Total == False and rel.E2Total == False:
+				entity = Entity()
+				FK1 = Attribute()
+				FK1.FK = True
+				FK1.name = E1.PK
+				entity.attribute.append(FK1)
+                                FK2 = Attribute()
+                                FK2.FK = True
+                                FK2.name = E2.PK
+                                entity.attribute.append(FK2)
+				entity.PK = FK1.name + "_" + FK2.name
+				entity.name = E1.name + "_" + E2.name
+				for attr in rel.attributes:
+					entity.attributes.append(attr)
+				relation = createTable(entity)
+				tables[entity.name] = relation	
+				
+			else:
+				if rel.E1Total == True:
+					# Add FK to link tables
+					tableE1 = tables[rel.E1.name]
+					tableE2 = tables[rel.E2.name]
+					FK = Attribute()
+					FK.FK = True
+					FK.name = tableE2.PK
+					tableE1.attributes.append(FK)	
+					for attr in rel.attributes:
+						tableE1.attributes.append(attr)			
+				else:
+                                        tableE1 = tables[rel.E1.name]
+                                        tableE2 = tables[rel.E2.name]
+                                        FK = Attribute()
+                                        FK.FK = True
+                                        FK.name = tableE1.PK
+                                        tableE2.attributes.append(FK)
+                                        for attr in rel.attributes:
+                                                tableE2.attributes.append(attr)
 
-		elif rel.type == RelationshipType.oneToMany:
-			# Create one table with attributes for one entity (R1), one table with the attributes 
-			# for the other table (R2) and then put the primary key from your origin (R1 one) table to the other table (R2 many) to keep track of
-                        # primary key referencing to R1.
-			
-			tableE1 = tables[rel.E1.name]
-			tableE2 = tables[rel.E2.name]
-			FK = Attribute()
-			FK.FK = True
-			FK.name = tableE2.PK
-			tableE1.attributes.append(FK)
-			for attr in rel.attributes:
-				tableE1.attributes.append(attr)
-		elif rel.type == RelationshipType.manyToMany:
+		elif rel.type == RelationType.oneToMany:
+			if rel.E1Total == False and rel.E2Total == False:
+				entity = Entity()
+                                FK1 = Attribute()
+                                FK1.FK = True
+                                FK1.name = E1.PK
+                                entity.attribute.append(FK1)
+                                FK2 = Attribute()
+                                FK2.FK = True
+                                FK2.name = E2.PK
+                                entity.attribute.append(FK2)
+                                entity.PK = FK1.name + "_" + FK2.name
+                                entity.name = E1.name + "_" + E2.name
+                                for attr in rel.attributes:
+                                        entity.attributes.append(attr)
+                                relation = createTable(entity)
+                                tables[entity.name] = relation
+
+			else:
+				tableE1 = tables[rel.E1.name]
+				tableE2 = tables[rel.E2.name]
+				FK = Attribute()
+				FK.FK = True
+				FK.name = tableE2.PK
+				tableE1.attributes.append(FK)
+				for attr in rel.attributes:
+					tableE1.attributes.append(attr)
+		elif rel.type == RelationType.manyToMany:
 			# Translate R1 and R2 into separate tables, then create a table to link these two tables
 			tableE1 = tables[rel.E1.name]
 			tableE2 = tables[rel.E2.name]
@@ -127,15 +182,16 @@ def generateTables(entities, relations):
 			for attr in rel.attributes:
 				entity.attributes.append(attr)
 			entity.name = rel.name
+			entity.PK = tableE1.PK + tableE2.PK
 			relation = createTable(entity)
 			tables[entity.name] = relation	
-		elif rel.type == RelationshipType.isa:
+		elif rel.type == RelationType.isa:
 			tableE1 = tables[rel.E1.name]
 			tableE2 = tables[rel.E2.name]
-			FK = Attribute()
-			FK.FK = True
-			FK.name = tableE2.PK
-			tableE1.attributes.append(FK)
+			PK = Attribute()
+			PK.PK = True
+			PK.name = tableE2.PK
+			tableE1.attributes.append(PK)
 	tableList = []
 	for key in tables:
 		tableList.append(tables[key])	
@@ -177,15 +233,14 @@ def displayResults(entities, relations):
 
 	
 
-def parse(file):
-	file = open(file, 'r')
+def parse(filename):
+	file = open(filename, 'r')
 	entities = {}
 	relations = {}
 	line = file.readline().strip()
 	while line:
 		elements = line.split('\t')
 		if elements[0] == "Entity":
-			print elements
 			entity = Entity()
 			entity.name = elements[1]
 			for i in range(0, int(elements[2])):
@@ -208,9 +263,10 @@ def parse(file):
 				if innerElements[4] == "True":
 					attr.FK = True
 				if innerElements[5] == "True":
+					print attr.name
 					entity.discriminator = attr.name
 				entity.attributes.append(attr)
-				if entity.PK == None:
+				if entity.PK == None and entity.discriminator == None:
 					PK = ""
 					for attr in entity.attributes:
 						PK += attr.name + "_"
@@ -220,17 +276,16 @@ def parse(file):
 				entity.weak = True
 			entities[entity.name] = entity
 		elif elements[0] == "Relation":
-			print line
-			relation = Relationship()
+			relation = Relation()
 			relation.name = elements[1]
 			if elements[2] == "oneToOne":
-				relation.type = RelationshipType.oneToOne
+				relation.type = RelationType.oneToOne
 			elif elements[2] == "oneToMany":
-				relation.type = RelationshipType.oneToMany
+				relation.type = RelationType.oneToMany
 			elif elements[2] == "manyToMany":
-				relation.type = RelationshipType.manyToMany
+				relation.type = RelationType.manyToMany
 			elif elements[2] == "isa":
-				relation.type = RelationshipType.isa
+				relation.type = RelationType.isa
 			E1 = elements[3]
 			E2 = elements[4]
 
@@ -242,9 +297,33 @@ def parse(file):
 					attr.name = innerElements[i]
 					relation.attributes.append(attr)
 				
-
 			relation.E1 = entities[E1]
 			relation.E2 = entities[E2]
+			
+			if elements[6] == "True":
+                                relation.identifying = True
+                                if relation.E1.PK != None:
+					print relation.E1.PK
+					print relation.E2.name
+					PK = Attribute()
+					PK.PK = True
+					PK.name = relation.E2.discriminator + "_" + relation.E1.PK
+					relation.E2.attributes.append(PK)
+					relation.E2.PK = PK.name
+				elif relation.E2.PK != None:
+					print relation.E1.name
+					PK = Attribute()
+                                        PK.PK = True
+                                        PK.name = relation.E1.discriminator + "_" + relation.E2.PK
+                                        relation.E1.attributes.append(PK)
+                                        relation.E1.PK = PK.name
+				else:
+					print "Identifying relation \"" + relation.name + "\" malformed. Neither entity has a primary key" 
+			
+			if elements[7] == "True":
+				relation.E1Total = True
+			if elements[8] == "True":
+                                relation.E2Total = True
 			relations[relation.name + E1 + "_" + E2] = relation
 		line = file.readline().strip()
 	entityList = []
@@ -254,14 +333,25 @@ def parse(file):
 		entityList.append(entities[key])
 	for key in relations:
 		relationList.append(relations[key])
-	print "Parsing done..."
-	displayResults(entityList, relationList)
-	entityList = preprocessAttributes(entityList)
-	print "Preprocessing done..."
-	displayResults(entityList, relationList)
-	tables = generateTables(entityList, relationList)	
-	printSchema(tables)
+	return [entityList, relationList]
 
-parse('ER.csv')
+
+def convert(file):
+	(entityList, relationList) = parse(file)
+        print "Parsing done:\n\n"
+        displayResults(entityList, relationList)
+        entityList = preprocessAttributes(entityList)
+        print "\n\nPreprocessing done:\n\n"
+        displayResults(entityList, relationList)
+        print "\n\nFinal schema:\n\n"
+        tables = generateTables(entityList, relationList)
+	return tables
+
+
+tables = convert(sys.argv[1])
+printSchema(tables)
+
+
+
 
 
