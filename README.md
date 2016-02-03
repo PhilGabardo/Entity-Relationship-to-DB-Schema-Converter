@@ -35,14 +35,14 @@ Then you must declare NUMBER_OF_ENTITY_ATTRIBUTES attributes...
 
 ##### Attribute Declaration
 To declare an attribute, include the following line:
-\<ATTRIBUTE_NAME\>(tab)\<IS_ATTRIBUTE_MULTIVALUED\>(tab)\<NUMBER_OF_NESTED_ATTRIBUTES\>(tab)\<IS_ATTRIBUTE_PRIMARY_KEY\>(tab)\<IS_ATTRIBUTE_FOREIGN_KEY\>(tab)\<IS_ATTRIBUTE_DISCRIMINATOR\>(tab)
+\<ATTRIBUTE_NAME\>(tab)\<IS_ATTRIBUTE_MULTIVALUED\>(tab)\<NUMBER_OF_NESTED_ATTRIBUTES\>(tab)\<IS_ATTRIBUTE_PRIMARY_KEY\>(tab)\<IS_ATTRIBUTE_FOREIGN_KEY\>(tab)\<IS_ATTRIBUTE_DISCRIMINATOR\>
 
 If the attribute contains nested attributes, another line must be included to declare these attributes. The line should include the nested attribute names, separated by tabs.
 
 #### Relation Declaration
 To declare a relation, include the following line:
 
-Relation(tab)\<RELATION_NAME\>(tab)\<RELATION_TYPE\>(tab)\<IS_ENTITY_WEAK\>(tab)\<ENTITY_1_NAME\>(tab)\<ENTITY_2_NAME\>(tab)\<NUMBER_OF_RELATION_ATTRIBUTES\>(tab)\<IS_RELATION_IDENTIFYING\>(tab)\<IS_ENTITY_1_TOTAL\>(tab)\<IS_ENTITY_2_TOTAL\>(tab)
+Relation(tab)\<RELATION_NAME\>(tab)\<RELATION_TYPE\>(tab)\<IS_ENTITY_WEAK\>(tab)\<ENTITY_1_NAME\>(tab)\<ENTITY_2_NAME\>(tab)\<NUMBER_OF_RELATION_ATTRIBUTES\>(tab)\<IS_RELATION_IDENTIFYING\>(tab)\<IS_ENTITY_1_TOTAL\>(tab)\<IS_ENTITY_2_TOTAL\>
 
 RELATION_TYPE must be one of {oneToOne, oneToMany, manyToMany, isa}.
 
