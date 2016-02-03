@@ -23,6 +23,24 @@ where \<filename\> is the tsv representation of the ER model you want to convert
 ALL entities must be declared before relations.
 
 #### Entity Declaration
-To declare an entity, include the following lines:
+
+NOTE: Any \<IS_*\> fields should either be True or False.
+
+To declare an entity, include the following line:
 
 Entity(tab)\<ENTITY_NAME\>(tab)\<NUMBER_OF_ENTITY_ATTRIBUTES\>(tab)\<IS_ENTITY_WEAK\>
+
+
+Then you must declare NUMBER_OF_ENTITY_ATTRIBUTES attributes...
+
+##### Attribute Declaration
+To declare an attribute, include the following line:
+<ATTRIBUTE_NAME\>(tab)\<IS_ATTRIBUTE_MULTIVALUED\>(tab)\<NUMBER_OF_NESTED_ATTRIBUTES\>(tab)<IS_ATTRIBUTE_PRIMARY_KEY\>(tab)<IS_ATTRIBUTE_FOREIGN_KEY\>(tab)<IS_ATTRIBUTE_DISCRIMINATOR\>(tab)
+
+If the attribute contains nested attributes, another line must be included to declare these attributes. The line should include the nested attribute names, separated by tabs.
+
+#### Relation Declaration
+To declare a relation, include the following line:
+
+
+
