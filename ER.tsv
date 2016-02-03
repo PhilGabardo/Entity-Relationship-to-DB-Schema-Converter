@@ -1,0 +1,74 @@
+Entity	Owner	5	False
+OwnerNumber	False	0	True	False	False
+Name	False	3	False	False	False
+FirstName	LastName	MiddleName
+Address	False	5	False	False	False
+StreetNumber	Street	City	Province	PostalCode
+PhoneNumbers	True	3	False	False	False
+AreaCode	Number	Extension
+EmailAddress	True	0	False	False	False
+Entity	Property	3	False
+PropertyNumber	False	0	True	False	False
+Address	False	3	False	False	False
+StreetNumber	Street	City	Province
+Type	False	0	False	False	False
+Entity	Staff	6	False
+StaffNumber	False	0	True	False	False
+Name	False	3	False	False	False
+FirstName	LastName	MiddleName
+Address	False	5	False	False	False
+StreetNumber	Street	City	Province	PostalCode
+PhoneNumbers	True	3	False	False	False
+AreaCode	Number	Extension
+EmailAddress	True	0	False	False	False
+Salary	False	0	False	False 	False
+Entity	Branch	4	False
+BranchNumber	False	0	True	False	False
+Address	False	5	False	False	False
+StreetNumber	Street	City	Province	PostalCode
+PhoneNumbers	True	3	False	False	False
+AreaCode	Number	Extension
+EmailAddress	True	0	False	False	False
+Entity	Renter	5	False
+RenterNumber	False	0	True	False	False
+Name	False	3	False	False	False
+FirstName	LastName	MiddleName
+Address	False	5	False	False	False
+StreetNumber	Street	City	Province	PostalCode
+PhoneNumbers	True	3	False	False	False
+AreaCode	Number	Extension
+EmailAddress	True	0	False	False	False
+Entity	RentalAgreement	4	True
+RentalNumber	False	0	False	False	True
+SigningDate	False	0	False	False	False
+StartingDate	False	0	False	False	False
+EndingDate	False	0	False	False	False
+Entity	Advertisement	1	True
+AdvertisementNumber	False	0	False	False	True
+Entity	Newspaper	1	False
+PaperName	False	0	True	False	False
+Entity	PrivateOwner	0	False
+Entity	BusinessOwner	1	False
+TypeOfBusiness	False	0	False	False	False
+Entity	Manager	0	False
+Entity	Worker	0	False
+Entity	PrivateRenter	0	False
+Entity	BusinessRenter	1	False
+TypeOfBusiness	False	0	False	False	False
+Relation	isa	isa	PrivateRenter	Renter	0	False	False	False
+Relation	isa	isa	BusinessRenter	Renter	0	False	False	False
+Relation	isa	isa	Manager	Staff	0	False	False	False
+Relation	isa	isa	Worker	Staff	0	False	False	False
+Relation	isa	isa	PrivateOwner	Owner	0	False	False	False
+Relation	isa	isa	BusinessOwner	Owner	0	False	False	False
+Relation	placedIn	oneToMany	Advertisement	Property	0	False	True	False
+Relation	displayedIn	oneToMany	Advertisement	Newspaper	1	True	True	False
+Date
+Relation	rentalOf	oneToMany	RentalAgreement	Property	0	False	True	False
+Relation	rents	oneToMany	RentalAgreement	Renter	0	False	True	False
+Relation	viewing	manyToMany	Renter	Property	1	False	False	False
+Date
+Relation	ownedBy	oneToMany	Property	Owner	0	False	True	False
+Relation	overseenBy	oneToMany	Property	Staff	0	False	True	False
+Relation	manages	oneToOne	Manager	Branch	0	False	True	True
+Relation	allocatedTo	oneToMany	Worker	Branch	0	False	True	True
