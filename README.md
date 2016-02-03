@@ -14,8 +14,9 @@ material inside out.
 ## Input/Output
 
 The script is run as:
-
+```
 python ERtoSchema.py \<filename\>
+```
 
 where \<filename\> is the tsv representation of the ER model you want to convert. The tsv file must be formatted according to the following conventions:
 
@@ -54,6 +55,6 @@ See ER.tsv for an example of a fully formatted ER file.
 ### Testing
 
 For a sample test case, run:
-'''
+```
 python ERtoSchema.py ER.tsv.
-'''
+```
