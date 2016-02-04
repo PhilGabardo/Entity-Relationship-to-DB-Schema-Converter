@@ -28,7 +28,7 @@ python ERtoSchema.py <filename>
 
 where \<filename\> is the tsv representation of the ER model you want to convert. The tsv file must be formatted according to the following conventions:
 
-#### Order
+#### Entity/Relation Declaration Order
 ALL entities must be declared before relations.
 
 #### Entity Declaration
