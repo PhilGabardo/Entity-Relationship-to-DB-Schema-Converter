@@ -363,7 +363,7 @@ def parse(filename):
 # Main flow.
 def convert(file):
 	(entityList, relationList) = parse(file)
-        # displayERBreakdown(entityList, relationList)  Uncomment this line to see parsed ER after attributes are preprocessed 
+        # displayERBreakdown(entityList, relationList)  Uncomment this line to see parsed ER before attributes are preprocessed 
         entityList = preprocessAttributes(entityList)
         # displayERBreakdown(entityList, relationList)	  Uncomment this line to see parsed ER after attributes are preprocessed
         tables = generateTables(entityList, relationList)
